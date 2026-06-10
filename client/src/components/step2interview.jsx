@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { ServerUrl } from "../App";
 import { BsArrowRight } from "react-icons/bs";
+import { useNavigate } from "react-router-dom";
 
 function Step2Interview({ interviewData, onFinish }) {
     const { interviewId, questions, userName } = interviewData
@@ -27,6 +28,7 @@ function Step2Interview({ interviewData, onFinish }) {
     const videoRef = useRef(null);
 
     const currentQuestion = questions[currentIndex];
+    const navigate=useNavigate()
 
     useEffect(() => {
         const loadVoices = () => {
@@ -276,6 +278,7 @@ function Step2Interview({ interviewData, onFinish }) {
         } catch (error) {
             console.log(error);
         }
+
     }
 
     useEffect(()=>{
@@ -283,7 +286,7 @@ function Step2Interview({ interviewData, onFinish }) {
         if(!currentQuestion) return;
 
         if(timeLeft === 0 && !isSubmitting && !feedback){
-            handleSubmit();
+            submitAnswer()
         }
     },[timeLeft]);
 
@@ -394,11 +397,11 @@ function Step2Interview({ interviewData, onFinish }) {
                         <motion.div className="mt-6 bg-emerald-50 border border-emerald-200 p-5 rounded-2xl shadow-sm">
                             <p className="text-emerald-700 mb-4 font-medium">{feedback}</p>
 
-                            <button
+                           {currentIndex+1===questions.length?navigate(`/report/${interviewId}`):<button
                             onClick={handleNext}
                             className="w-full bg-linear-to-r from-emerald-600 to-teal-500 text-white py-3 rounded-xl shadow-md hover:opacity-90 transition flex items-center justify-center gap-1">
                                 Next Question <BsArrowRight size={18}/>
-                            </button>
+                            </button>}
                         </motion.div>
                     )}
                 </div>
