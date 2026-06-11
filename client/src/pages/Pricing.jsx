@@ -2,10 +2,17 @@ import { useState } from "react";
 import { FaArrowLeft, FaCheckCircle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { motion, scale } from "motion/react";
+import { ServerUrl } from "../App";
+import axios from "axios"
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
+
 
 function Pricing() {
   const [selectedPlan, setSelectedPlan] = useState("basic");
   const navigate = useNavigate();
+  const [loadingPlan , setLoadingPlan] = useState(null);
+  const dispatch = useDispatch()
 
   const plans = [
     {
@@ -50,6 +57,49 @@ function Pricing() {
       badge: "Best Value",
     },
   ];
+
+  const handlePayment=async (plan) => {
+    try {
+      setLoadingPlan(plan.id)
+
+      const amount =
+      plan.id==="basic"?100:plan.id==="pro"?500:0;
+
+      const result = await axios.post(ServerUrl + "/api/payment/order", {
+        planId:plan.id,
+        amount:amount,
+        credits:plan.credits,
+      },{withCredentials:true})
+
+      const options ={
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: result.data.amount,
+        currency:"INR",
+        name: "NexHire AI",
+        description:`${plan.name}-${plan.credits} Credits`,
+        order_id:result.data.id,
+
+        handler: async (response) => {
+          const verifypay= await axios.post(ServerUrl + "/api/payment/verify",response,{withCredentials:true})
+          dispatch(setUserData(verifypay.data.user))
+
+          alert("Payment Successful 🎉 Credits Added");
+          navigate("/")
+        },
+        theme:{
+          color:"#10b981"
+        }
+      }
+
+      const rzp = new window.Razorpay(options)
+      rzp.open();
+
+      setLoadingPlan(null)
+    } catch (error) {
+      console.log(error);
+      selectedPlan(null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-emerald-50 py-16 px-6">
@@ -129,13 +179,22 @@ function Pricing() {
               </div>
               {!plan.default && (
                 <button
+                disabled={loadingPlan===plan.id}
+                onClick={(e)=>{e.stopPropagation()
+                  if(!isSelected){
+                    setSelectedPlan(plan.id)
+                  }else{
+                    handlePayment(plan)
+                  }
+                }}
                   className={`w-full mt-8 py-3 rounded-xl font-semibold transition ${
                     isSelected
                       ? "bg-emerald-600 text-white hover:opacity-90"
                       : "bg-gray-100 text-gray-700 hover:bg-emerald-50"
                   }`}
                 >
-                    {isSelected? "Proceed to Pay":"Select Plan"}
+                    {loadingPlan=== plan.id? "Processing...":
+                    isSelected? "Proceed to Pay":"Select Plan"}
                 </button>
               )}
             </motion.div>

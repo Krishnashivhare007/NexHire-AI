@@ -7,7 +7,7 @@ function AuthModel({onClose}) {
 
     useEffect(()=>{
         if(userData){
-            onclose()
+            onClose()
         }
     },[userData,onClose])
 
