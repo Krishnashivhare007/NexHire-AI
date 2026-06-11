@@ -10,7 +10,7 @@ import InterviewHistory from './pages/InterviewHistory'
 import Pricing from './pages/Pricing'
 import InterviewReport from './pages/interviewReport'
 
-export const ServerUrl="http://localhost:8000"
+export const ServerUrl="https://nexhire-ai-7yev.onrender.com"
 
 
 function App() {
