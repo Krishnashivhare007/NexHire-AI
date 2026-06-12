@@ -11,7 +11,8 @@ dotenv.config()
 
 const app=express()
 app.use(cors({
-    origin:"https://nexhire-ai-client.onrender.com",
+    origin:["https://nexhire-ai-client.onrender.com",
+    "http://localhost:5173"],
     credentials:true
 }))
 
