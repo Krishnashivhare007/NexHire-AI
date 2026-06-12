@@ -193,10 +193,20 @@ function Step2Interview({ interviewData, onFinish }) {
         recognition.interimResults = false;
 
         recognition.onresult = (event) => {
-            const transcript =
-                event.results[event.results.length - 1][0].transcript;
+            let finalTranscript = "";
+            
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                // Only capture the text if the browser confirms it is a final result
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                }
+            }
 
-            setAnswer((prev) => prev + " " + transcript);
+            // Only update state if we actually have a final confirmed string
+            if (finalTranscript) {
+                setAnswer((prev) => prev + (prev ? " " : "") + finalTranscript.trim());
+            }
         };
         recognitionRef.current = recognition;
     }, []);
